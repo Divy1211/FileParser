@@ -1,10 +1,10 @@
 from typing import Literal
 
-from src.types.IncrementalGenerator import IncrementalGenerator
-from src.types.ParserType import ParserType
+from src.types.IncrementalGenerator cimport IncrementalGenerator
+from src.types.ParserType cimport ParserType
 
 
-class Int(ParserType):
+cdef class Int(ParserType):
     _byte_len = 4
     _signed = True
 
@@ -21,30 +21,30 @@ class Int(ParserType):
         return int.to_bytes(value, cls._byte_len, byteorder, signed = cls._signed)
 
 
-class Int8(Int):
+cdef class Int8(Int):
     _byte_len = 1
 
-class Int16(Int):
+cdef class Int16(Int):
     _byte_len = 2
 
-class Int32(Int):
+cdef class Int32(Int):
     _byte_len = 4
 
-class Int64(Int):
+cdef class Int64(Int):
     _byte_len = 8
 
-class UInt8(Int):
+cdef class UInt8(Int):
     _byte_len = 1
     _signed = False
 
-class UInt16(Int):
+cdef class UInt16(Int):
     _byte_len = 2
     _signed = False
 
-class UInt32(Int):
+cdef class UInt32(Int):
     _byte_len = 4
     _signed = False
 
-class UInt64(Int):
+cdef class UInt64(Int):
     _byte_len = 8
     _signed = False

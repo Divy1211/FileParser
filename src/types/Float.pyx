@@ -1,11 +1,11 @@
 import struct
 from typing import Literal
 
-from src.types.IncrementalGenerator import IncrementalGenerator
-from src.types.ParserType import ParserType
+from src.types.IncrementalGenerator cimport IncrementalGenerator
+from src.types.ParserType cimport ParserType
 
 
-class Float(ParserType):
+cdef class Float(ParserType):
     _byte_len = 4
     _struct_symbol = 'f'
 
@@ -22,14 +22,14 @@ class Float(ParserType):
         return struct.pack(cls._struct_symbol, value)
 
 
-class Float16(Float):
+cdef class Float16(Float):
     _byte_len = 2
     _struct_symbol = 'e'
 
-class Float32(Float):
+cdef class Float32(Float):
     _byte_len = 4
     _struct_symbol = 'f'
 
-class Float64(Float):
+cdef class Float64(Float):
     _byte_len = 8
     _struct_symbol = 'd'

@@ -38,6 +38,7 @@ class BaseStruct(ParserType):
 
     def __init__(self, struct_version: tuple[int, ...] = (0,)):
         self.struct_version = struct_version
+        self.parent: object = None
 
     @classmethod
     def get_version(cls, igen: IncrementalGenerator) -> tuple[int, ...]:

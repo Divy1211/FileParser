@@ -47,7 +47,7 @@ class ScenarioSections(BaseStruct):
 
     @classmethod
     def get_version(cls, igen: IncrementalGenerator) -> tuple[int, ...]:
-        ver_str = igen.get_bytes(4, update_progress = False).decode("ASCII")
+        ver_str = igen.peek_bytes(4).decode("ASCII")
         return tuple(map(int, ver_str.split(".")))
 
     def __init__(self, struct_version: tuple[int, ...] = (1, 47)):

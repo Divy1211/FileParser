@@ -6,7 +6,7 @@ T = TypeVar("T")
 MapValidateSub = TypeVar("MapValidateSub", bound = "MapValidate")
 
 
-class MapValidate:
+cdef class MapValidate:
     __slots__ = "p_name", "s_name", "mappers", "validators", "on_get", "on_set"
 
     def __init__(

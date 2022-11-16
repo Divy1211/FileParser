@@ -1,12 +1,11 @@
 from __future__ import annotations
-from abc import ABC
 from typing import Literal
 
-from src.types.IncrementalGenerator import IncrementalGenerator
-from src.types.ParserType import ParserType
+from src.types.IncrementalGenerator cimport IncrementalGenerator
+from src.types.ParserType cimport ParserType
 
 
-class BaseStr(ParserType, ABC):
+cdef class BaseStr(ParserType):
     @classmethod
     def from_bytes(cls, bytes_: bytes, byteorder: Literal["big", "little"] = "little", struct_version: tuple[int, ...] = (0,)) -> str:
         try:
@@ -25,7 +24,7 @@ class BaseStr(ParserType, ABC):
         return bytes_
 
 
-class CStr(BaseStr):
+cdef class CStr(BaseStr):
     @classmethod
     def from_generator(cls, igen: IncrementalGenerator, byteorder: Literal["big", "little"] = "little", struct_version: tuple[int, ...] = (0,)) -> str:
         bytes_ = b""
@@ -37,7 +36,7 @@ class CStr(BaseStr):
     def to_bytes(cls, value: str, byteorder: Literal["big", "little"] = "little") -> bytes:
         return super().to_bytes(value, byteorder)+b"\x00"
 
-class Str(BaseStr):
+cdef class Str(BaseStr):
     _len_len = 4
 
     @classmethod
@@ -51,19 +50,19 @@ class Str(BaseStr):
         length = int.to_bytes(len(bytes_), length = cls._len_len, byteorder = "little", signed = False)
         return length+bytes_
 
-class Str8(Str):
+cdef class Str8(Str):
     _len_len = 1
 
-class Str16(Str):
+cdef class Str16(Str):
     _len_len = 2
 
-class Str32(Str):
+cdef class Str32(Str):
     _len_len = 4
 
-class Str64(Str):
+cdef class Str64(Str):
     _len_len = 8
 
-class NullTermStr(BaseStr):
+cdef class NullTermStr(BaseStr):
     _len_len = 4
 
     @classmethod
@@ -78,19 +77,19 @@ class NullTermStr(BaseStr):
         return length + bytes_
 
 
-class NullTermStr8(NullTermStr):
+cdef class NullTermStr8(NullTermStr):
     _len_len = 1
 
-class NullTermStr16(NullTermStr):
+cdef class NullTermStr16(NullTermStr):
     _len_len = 2
 
-class NullTermStr32(NullTermStr):
+cdef class NullTermStr32(NullTermStr):
     _len_len = 4
 
-class NullTermStr64(NullTermStr):
+cdef class NullTermStr64(NullTermStr):
     _len_len = 8
 
-class NullTermNonEmptyStr(BaseStr):
+cdef class NullTermNonEmptyStr(BaseStr):
     _len_len = 4
 
     @classmethod
@@ -108,22 +107,22 @@ class NullTermNonEmptyStr(BaseStr):
         length = int.to_bytes(len(bytes_), length = cls._len_len, byteorder = "little", signed = False)
         return length + bytes_
 
-class NullTermNonEmptyStr8(NullTermNonEmptyStr):
+cdef class NullTermNonEmptyStr8(NullTermNonEmptyStr):
     _len_len = 1
 
-class NullTermNonEmptyStr16(NullTermNonEmptyStr):
+cdef class NullTermNonEmptyStr16(NullTermNonEmptyStr):
     _len_len = 2
 
-class NullTermNonEmptyStr32(NullTermNonEmptyStr):
+cdef class NullTermNonEmptyStr32(NullTermNonEmptyStr):
     _len_len = 4
 
-class NullTermNonEmptyStr64(NullTermNonEmptyStr):
+cdef class NullTermNonEmptyStr64(NullTermNonEmptyStr):
     _len_len = 8
 
-class FixedLenStr(BaseStr):
+cdef class FixedLenStr(BaseStr):
     __slots__ = "length",
 
-    def is_valid(self, value: str) -> tuple[bool, str]:
+    cpdef tuple is_valid(self, str value):
         if len(value) == self.length:
             return True, ""
         return False, f"%s must have a fixed length of {value}"
@@ -131,7 +130,7 @@ class FixedLenStr(BaseStr):
     def __init__(self, length: int):
         self.length = length
 
-    def from_generator(self, igen: IncrementalGenerator, byteorder: Literal["big", "little"] = "little", struct_version: tuple[int, ...] = (0,)) -> str:
+    cpdef str from_generator(self, IncrementalGenerator igen, str byteorder, tuple struct_version):
         return self.from_bytes(igen.get_bytes(self.length))
 
     def __class_getitem__(cls, item: int) -> FixedLenStr:

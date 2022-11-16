@@ -228,7 +228,7 @@ class TriggerData(BaseStruct):
 
     @classmethod
     def get_version(cls, igen: IncrementalGenerator) -> tuple[int, ...]:
-        ver_str = str(Float64.from_bytes(igen.get_bytes(8, update_progress = False)))
+        ver_str = str(Float64.from_bytes(igen.peek_bytes(8)))
         return tuple(map(int, ver_str.split(".")))
 
     def __init__(self, struct_version: tuple[int, ...] = (3, 2)):

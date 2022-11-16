@@ -1,10 +1,10 @@
 from typing import Literal
 
-from src.types.IncrementalGenerator import IncrementalGenerator
-from src.types.ParserType import ParserType
+from src.types.IncrementalGenerator cimport IncrementalGenerator
+from src.types.ParserType cimport ParserType
 
 
-class Bool(ParserType):
+cdef class Bool(ParserType):
     _byte_len = 1
 
     @classmethod
@@ -20,14 +20,14 @@ class Bool(ParserType):
         return int.to_bytes(int(value), cls._byte_len, byteorder, signed = False)
 
 
-class Bool8(Bool):
+cdef class Bool8(Bool):
     _byte_len = 1
 
-class Bool16(Bool):
+cdef class Bool16(Bool):
     _byte_len = 2
 
-class Bool32(Bool):
+cdef class Bool32(Bool):
     _byte_len = 4
 
-class Bool64(Bool):
+cdef class Bool64(Bool):
     _byte_len = 8

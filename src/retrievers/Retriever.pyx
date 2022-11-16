@@ -1,16 +1,11 @@
 from __future__ import annotations
 
-from abc import ABCMeta
-from typing import Type, TYPE_CHECKING, Any, Callable, TypeVar
+from typing import Type, Any, Callable, TypeVar
 
-from src.types.IncrementalGenerator import IncrementalGenerator
-from src.retrievers.MapValidate import MapValidate
-from src.errors.VersionError import VersionError
-from src.types.ParserType import ParserTypeObjCls
+from src.types.IncrementalGenerator cimport IncrementalGenerator
+from src.retrievers.MapValidate cimport MapValidate
+from src.errors.VersionError cimport VersionError
 from src.types.BaseStruct import BaseStruct
-
-if TYPE_CHECKING:
-    pass
 
 
 def ver_str(ver: tuple[int]) -> str:
@@ -19,7 +14,7 @@ def ver_str(ver: tuple[int]) -> str:
 
 T = TypeVar("T")
 RetrieverSub = TypeVar("RetrieverSub", bound = "Retriever")
-BaseStructSub = TypeVar("BaseStructSub", bound = BaseStruct)
+BaseStructSub = TypeVar("BaseStructSub", bound = "BaseStruct")
 
 
 class Retriever(MapValidate):
@@ -52,11 +47,11 @@ class Retriever(MapValidate):
         self.on_write = on_write or []
 
         # if class/object overrides the is_valid method
-        if 'is_valid' in cls_or_obj.__dict__:
-            if self._repeat == 1:
-                self.validators.append(cls_or_obj.is_valid)
-            else:
-                self.validators.append(lambda iterable: all(map(cls_or_obj.is_valid, iterable)))
+        # if 'is_valid' in cls_or_obj.__dict__:
+        #     if self._repeat == 1:
+        #         self.validators.append(cls_or_obj.is_valid)
+        #     else:
+        #         self.validators.append(lambda iterable: all(map(cls_or_obj.is_valid, iterable)))
 
     def supported(self, ver: tuple[int, ...]) -> bool:
         return self.min_ver < ver < self.max_ver
@@ -106,7 +101,7 @@ class Retriever(MapValidate):
             return repeat
         return self._repeat
 
-    def from_generator(self, instance: BaseStruct, igen: IncrementalGenerator):
+    def from_generator(self, instance: BaseStruct, igen: IncrementalGenerator, byteorder: str = "little"):
         if not self.supported(instance.struct_version):
             return
 
@@ -115,10 +110,10 @@ class Retriever(MapValidate):
             setattr(instance, self.p_name, None)
             return
 
-        is_sub_obj = isinstance(self.cls_or_obj, BaseStruct) or type(self.cls_or_obj) is ABCMeta and issubclass(self.cls_or_obj, BaseStruct)
+        is_sub_obj = isinstance(self.cls_or_obj, BaseStruct) or type(self.cls_or_obj) is type and issubclass(self.cls_or_obj, BaseStruct)
 
         if repeat == 1 and not hasattr(instance, self.r_name):
-            obj = self.cls_or_obj.from_generator(igen, struct_version = instance.struct_version)
+            obj = self.cls_or_obj.from_generator(igen, struct_version = instance.struct_version, byteorder = byteorder)
             if is_sub_obj:
                 obj.parent = instance
             setattr(instance, self.p_name, obj)
@@ -126,7 +121,7 @@ class Retriever(MapValidate):
 
         ls: list = [None] * repeat
         for i in range(repeat):
-            ls[i] = self.cls_or_obj.from_generator(igen, struct_version = instance.struct_version)
+            ls[i] = self.cls_or_obj.from_generator(igen, struct_version = instance.struct_version, byteorder = byteorder)
             if is_sub_obj:
                 ls[i].parent = instance
         setattr(instance, self.p_name, ls)
@@ -134,7 +129,7 @@ class Retriever(MapValidate):
         for func in self.on_read:
             func(self, instance)
 
-    def to_bytes(self, instance: BaseStruct) -> bytes:
+    def to_bytes(self, instance: BaseStruct, byteorder: str = "little") -> bytes:
         if not self.supported(instance.struct_version):
             return b""
 
@@ -146,7 +141,7 @@ class Retriever(MapValidate):
             func(self, instance)
 
         if repeat == 1 and not hasattr(instance, self.r_name):
-            return self.cls_or_obj.to_bytes(getattr(instance, self.p_name))
+            return self.cls_or_obj.to_bytes(getattr(instance, self.p_name), byteorder = byteorder)
 
         ls: list = getattr(instance, self.p_name)
 
@@ -158,6 +153,6 @@ class Retriever(MapValidate):
 
         ls: list[bytes] = [b""] * repeat
         for j, value in enumerate(getattr(instance, self.p_name)):
-            ls[j] = self.cls_or_obj.to_bytes(value)
+            ls[j] = self.cls_or_obj.to_bytes(value, byteorder = byteorder)
 
         return b"".join(ls)
