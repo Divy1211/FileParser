@@ -1,1 +1,6 @@
 venv/*
+src/build/*
+*.pyd
+*.so
+*.obj
+*.c
